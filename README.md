@@ -2,13 +2,13 @@
 
 Project analisis dan sistem rekomendasi film berbasis **graph database Neo4j**. Tiga pendekatan dibandingkan: **User-Based CF (Jaccard)**, **Item-Based CF (co-occurrence)**, dan **Hybrid (Genre + User CF)**.
 
-## 🎯 Tujuan
+## 1. Tujuan
 - Memahami karakteristik data rating (distribusi, aktivitas user, sparsity).
 - Merekomendasikan film yang belum ditonton berdasarkan kemiripan selera antar-user.
 - Merekomendasikan film berdasarkan pola co-occurrence antar-film.
 - Menggabungkan preferensi genre dan sinyal user serupa dalam satu skor hybrid.
 
-## 🧩 Dataset & Skema Graph
+## 2. Dataset & Skema Graph
 
 | Komponen | Detail |
 |---|---|
@@ -24,7 +24,7 @@ Project analisis dan sistem rekomendasi film berbasis **graph database Neo4j**. 
 - Property `rating` dan `timestamp` awalnya bertipe STRING dan dikonversi menjadi angka sebelum analisis.
 - Definisi "suka": **rating ≥ 4.0**. Target uji: **user 414** (user paling aktif) dan film acuan **Forrest Gump (1994)**.
 
-## 🔬 Alur Penelitian
+## 3. Alur Penelitian
 
 ```mermaid
 flowchart TD
@@ -40,15 +40,15 @@ flowchart TD
     class A,B,C,D,E,F,G biru
 ```
 
-## 📊 Hasil & Insight
+## 4. Hasil & Insight
 
-### 1. Exploratory Data Analysis
+### a. Exploratory Data Analysis
 - **Rating condong positif:** rata-rata 3,50 (median 3,5), modus 4.0 (26,6%). Rating ≥ 4.0 mencakup **48,2%** data, sehingga ambang "suka" ≥ 4.0 selektif namun tetap menghasilkan himpunan yang cukup besar.
 - **Aktivitas user timpang:** 10 user teratas (1,6% dari user) menyumbang ±16% dari seluruh rating. User paling aktif cenderung lebih kritis (rata-rata rating turun dari 3,71 pada user 20–99 rating menjadi 3,35 pada user 500+ rating).
 - **Popularitas ≠ kualitas:** *Shawshank Redemption* populer sekaligus berating tertinggi (4,43), sedangkan *Jurassic Park* sangat populer tetapi hanya 3,75.
 - **Data sangat sparse (98,3%):** rata-rata satu film hanya dinilai ±10 user, sehingga kemiripan antar-user perlu ambang irisan minimal.
 
-### 2. User-Based CF (Jaccard): user 414
+### b. User-Based CF (Jaccard): user 414
 User 414 menyukai 1.227 film. Tetangga terdekat: user 474 (Jaccard 0,195, irisan 329 film).
 
 | # | Rekomendasi | Skor CF | Pendukung |
@@ -61,7 +61,7 @@ User 414 menyukai 1.227 film. Tetangga terdekat: user 474 (Jaccard 0,195, irisan
 
 **Insight:** nilai Jaccard maksimum hanya ±0,20 (wajar pada data sparse), jadi yang dibaca adalah peringkat relatifnya. **7 dari 20 tetangga teratas termasuk 10 user paling aktif**, menandakan bias *heavy user*.
 
-### 3. Item-Based CF (Co-occurrence)
+### c. Item-Based CF (Co-occurrence)
 Film yang sering disukai bersama **Forrest Gump**:
 
 | # | Film | Disukai bersama | Confidence |
@@ -84,7 +84,7 @@ Rekomendasi personal untuk **user 414** (skor dinormalisasi popularitas):
 
 **Insight:** 7 dari 10 film terkait Forrest Gump ada di daftar film paling banyak di-review, sehingga co-occurrence murni condong ke film populer. Normalisasi popularitas mengangkat film yang lebih niche, dan tiap rekomendasi didukung banyak film favorit user, bukan hanya satu.
 
-### 4. Hybrid (Genre + User CF)
+### d. Hybrid (Genre + User CF)
 Skor hybrid = 0,6 × CF ternormalisasi + 0,4 × genre affinity.
 
 | # | Rekomendasi | CF | Genre | Hybrid |
@@ -97,7 +97,7 @@ Skor hybrid = 0,6 × CF ternormalisasi + 0,4 × genre affinity.
 
 **Insight:** genre favorit user 414 didominasi Drama, sedangkan Horror sangat kecil (±1,3%), tetapi Psycho dan The Shining tetap teratas karena sinyal CF kuat. Hybrid menaikkan film yang cocok genre (*Life Is Beautiful* dari peringkat 9 di User-CF ke peringkat 3) dan menyingkirkan film yang hanya kuat di CF (Borat, Harry Potter PoA, The Birds).
 
-### 5. Perbandingan Pendekatan
+### e. Perbandingan Pendekatan
 
 | Aspek | User-CF | Item-CF | Hybrid |
 |---|---|---|---|
@@ -105,7 +105,7 @@ Skor hybrid = 0,6 × CF ternormalisasi + 0,4 × genre affinity.
 | Kelebihan | Personal, menangkap selera kelompok | Stabil, mudah dijelaskan | Lebih relevan secara genre dan beragam |
 | Kelemahan | Bias *heavy user* | Bias popularitas tanpa normalisasi | Condong ke film multi-genre |
 
-## ✅ Kesimpulan
+## 5. Kesimpulan
 1. Data sangat sparse (98,3%) dan timpang, sehingga ambang irisan dan jumlah pendukung diperlukan agar rekomendasi tidak noise.
 2. **7 dari 10 rekomendasi User-CF dan Item-CF sama** untuk user 414, yang menjadi indikasi bahwa rekomendasi tersebut kuat.
 3. Hybrid menjaga dua rekomendasi teratas tetapi menyesuaikan urutan berdasarkan genre, sehingga hasil lebih sesuai profil user.
